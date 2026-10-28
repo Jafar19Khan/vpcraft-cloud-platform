@@ -1,0 +1,68 @@
+#!/bin/bash
+set -euo pipefail
+exec > >(tee /var/log/vpcraft-bootstrap.log | logger -t vpcraft-bootstrap -s 2>/dev/console) 2>&1
+trap 'echo "VPCRAFT_BOOTSTRAP_FAILED at line $LINENO"' ERR
+
+retry() {
+  local attempt=1
+  until "$@"; do
+    if [[ $attempt -ge 5 ]]; then
+      return 1
+    fi
+    attempt=$((attempt + 1))
+    sleep 10
+  done
+}
+
+echo "VPCRAFT_BOOTSTRAP_STARTED"
+retry dnf update -y
+# curl-minimal is already present on Amazon Linux 2023; installing full curl conflicts with it.
+retry dnf install -y docker git
+systemctl enable --now amazon-ssm-agent
+systemctl enable --now docker
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+retry curl -fsSL https://github.com/docker/compose/releases/download/v2.39.4/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+usermod -aG docker ec2-user
+
+if [[ "${github_repo_url}" == *"REPLACE_ME"* ]]; then
+  echo "Set github_repo_url to your public repository before applying Terraform." >&2
+  exit 1
+fi
+rm -rf /opt/vpcraft
+retry git clone --depth 1 "${github_repo_url}" /opt/vpcraft
+cd /opt/vpcraft
+
+# Instance metadata via IMDSv2 (session token required); shown on the dashboard.
+TOKEN=$(curl -fsS -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 300" || true)
+imds() { curl -fsS -H "X-aws-ec2-metadata-token: $TOKEN" "http://169.254.169.254/latest/meta-data/$1" || true; }
+
+cat > .env <<ENVVARS
+APP_ENV=${environment}
+APP_PORT=80
+AWS_REGION=${aws_region}
+INSTANCE_ID=$(imds instance-id)
+INSTANCE_TYPE=$(imds instance-type)
+AVAILABILITY_ZONE=$(imds placement/availability-zone)
+PUBLIC_IP=$(imds public-ipv4)
+ENVVARS
+
+# Amazon Linux 2023 ships Docker without the buildx plugin; use the built-in builder.
+export DOCKER_BUILDKIT=0
+export COMPOSE_BAKE=false
+retry docker compose up -d --build
+
+for attempt in $(seq 1 60); do
+  if curl -fsS http://127.0.0.1/ready; then
+    echo
+    echo "VPCRAFT_BOOTSTRAP_COMPLETE"
+    exit 0
+  fi
+  sleep 5
+done
+docker compose ps
+docker compose logs --tail 50
+echo "VPCRAFT_BOOTSTRAP_FAILED application did not become ready"
+exit 1

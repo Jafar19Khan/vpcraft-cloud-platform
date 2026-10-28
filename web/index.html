@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220"><title>VPCraft · Cloud Operations</title>
+  <meta name="description" content="VPCraft cloud operations dashboard: live health, host resources and platform events.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/"><span class="brand-mark">V</span><span>vpcraft<small>CLOUD OPERATIONS</small></span></a>
+      <div class="nav-label">WORKSPACE</div><a class="nav active" href="/">▦ <span>Overview</span></a>
+      <div class="nav-label">PLATFORM</div>
+      <a class="nav" href="#resources">◈ <span>Resources</span></a>
+      <a class="nav" href="#latency">◷ <span>Latency</span></a>
+      <a class="nav" href="#infrastructure">◇ <span>Infrastructure</span></a>
+      <a class="nav" href="#activity">≡ <span>Activity</span></a>
+      <div class="sidebar-bottom"><span class="pulse"></span> Platform monitor <strong id="live-label">Live</strong><p>Refreshes every 10 seconds.<br><span id="last-refresh">Waiting for first sample…</span></p></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><span class="eyebrow">WORKSPACE / OVERVIEW</span><h1>Cloud overview</h1></div>
+        <div class="user-chip"><span class="avatar" id="env-avatar">--</span><span><span id="env-name">Environment</span><small id="version">v--</small></span></div></header>
+
+      <section class="welcome"><div><span class="eyebrow light">PLATFORM CONTROL</span><h2>Your cloud, <em>well-crafted.</em></h2><p>Live platform health, host resources and deployment activity for a single-instance AWS environment provisioned with Terraform.</p></div><div class="welcome-orbit"><div class="orbit o1"></div><div class="orbit o2"></div><div class="planet">V</div></div></section>
+
+      <section class="metrics" id="services">
+        <article class="metric"><div class="metric-top"><span>API STATUS</span><span class="metric-icon green">✳</span></div><div class="metric-value" id="api-status">Checking…</div><p>Process health · /health</p></article>
+        <article class="metric"><div class="metric-top"><span>DATABASE</span><span class="metric-icon blue">▤</span></div><div class="metric-value" id="db-status">Checking…</div><p>SQLite readiness · /ready</p></article>
+        <article class="metric"><div class="metric-top"><span>APP UPTIME</span><span class="metric-icon purple">⏱</span></div><div class="metric-value" id="app-uptime">--</div><p id="host-uptime">Host uptime --</p></article>
+        <article class="metric"><div class="metric-top"><span>DB LATENCY</span><span class="metric-icon amber">⚡</span></div><div class="metric-value" id="latency-now">--</div><p id="latency-avg">Average --</p></article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel" id="resources"><div class="panel-heading"><div><span class="eyebrow">HOST RESOURCES</span><h3>Compute, memory and storage</h3></div><span class="tag"><span class="dot"></span> Live</span></div>
+          <div class="gauge"><div class="gauge-head"><span>CPU load</span><strong id="cpu-text">--</strong></div><div class="bar"><div class="bar-fill" id="cpu-bar"></div></div><small id="cpu-detail">Load average --</small></div>
+          <div class="gauge"><div class="gauge-head"><span>Memory</span><strong id="mem-text">--</strong></div><div class="bar"><div class="bar-fill" id="mem-bar"></div></div><small id="mem-detail">--</small></div>
+          <div class="gauge"><div class="gauge-head"><span>Data volume</span><strong id="disk-text">--</strong></div><div class="bar"><div class="bar-fill" id="disk-bar"></div></div><small id="disk-detail">--</small></div>
+        </article>
+        <article class="panel side-panel" id="infrastructure"><span class="eyebrow">DEPLOYMENT PROFILE</span><h3>Lean by design.</h3><p>One EC2 host runs Nginx, a Flask API and SQLite in containers inside a dedicated VPC. No NAT gateway, load balancer or managed database.</p>
+          <div class="profile-line"><span>Region</span><strong id="region">--</strong></div>
+          <div class="profile-line"><span>Availability zone</span><strong id="az">--</strong></div>
+          <div class="profile-line"><span>Instance</span><strong id="instance-type">--</strong></div>
+          <div class="profile-line"><span>Instance ID</span><strong id="instance-id">--</strong></div>
+          <div class="profile-line"><span>Public IP</span><strong id="public-ip">--</strong></div>
+          <div class="profile-line"><span>Container</span><strong id="hostname">--</strong></div>
+        </article>
+      </section>
+
+      <section class="panel activity" id="latency"><div class="panel-heading"><div><span class="eyebrow">DATABASE LATENCY</span><h3>Recent samples</h3></div><span class="tag" id="sample-count">0 samples</span></div>
+        <svg id="latency-chart" class="chart" viewBox="0 0 600 140" preserveAspectRatio="none" role="img" aria-label="Database latency over recent samples"></svg>
+        <div class="chart-note" id="chart-note">Collecting samples…</div>
+      </section>
+
+      <section class="content-grid lower">
+        <article class="panel" id="activity"><div class="panel-heading"><div><span class="eyebrow">RECENT ACTIVITY</span><h3>Platform events</h3></div><span class="tag">Latest first</span></div><div id="events" class="events"><div class="empty">Loading platform events…</div></div></article>
+        <article class="panel"><div class="panel-heading"><div><span class="eyebrow">ENDPOINTS</span><h3>Operational API</h3></div></div>
+          <a class="endpoint" href="/health"><code>GET /health</code><span>Process health</span></a>
+          <a class="endpoint" href="/ready"><code>GET /ready</code><span>Database readiness</span></a>
+          <a class="endpoint" href="/api/overview"><code>GET /api/overview</code><span>Platform and instance metadata</span></a>
+          <a class="endpoint" href="/api/system"><code>GET /api/system</code><span>Host resource snapshot</span></a>
+          <a class="endpoint" href="/api/status"><code>GET /api/status</code><span>Latency samples</span></a>
+        </article>
+      </section>
+      <footer>VPCRAFT <span>·</span> Cost-aware cloud engineering <span class="footer-right">Terraform · Docker · GitHub Actions</span></footer>
+    </main>
+  </div>
+  <script src="/app.js" defer></script>
+</body></html>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img" aria-labelledby="title desc">
+  <title id="title">VPCraft — Cost-Aware AWS Cloud Infrastructure Platform</title>
+  <desc id="desc">Original VPCraft brand banner with a stylized orbit mark and cloud engineering tagline.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1425"/><stop offset="1" stop-color="#153b52"/></linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ce8ca"/><stop offset="1" stop-color="#4d9be7"/></linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#4bc6b0" stop-opacity=".24"/><stop offset="1" stop-color="#4bc6b0" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="280" rx="24" fill="url(#bg)"/>
+  <circle cx="1000" cy="135" r="220" fill="url(#glow)"/>
+  <g transform="translate(910 140)">
+    <ellipse rx="190" ry="72" fill="none" stroke="#8bdccf" stroke-opacity=".48" stroke-width="2" transform="rotate(-24)"/>
+    <ellipse rx="165" ry="95" fill="none" stroke="#75aee5" stroke-opacity=".42" stroke-width="2" transform="rotate(28)"/>
+    <circle r="49" fill="url(#accent)"/>
+    <text x="0" y="15" fill="#0b2030" font-family="Arial,sans-serif" font-size="42" font-weight="800" text-anchor="middle">O</text>
+    <circle cx="166" cy="-57" r="7" fill="#a5f1d9"/>
+    <circle cx="-154" cy="65" r="5" fill="#78b6ee"/>
+  </g>
+  <g fill="#ffffff" font-family="Arial,sans-serif">
+    <text x="76" y="108" font-size="17" font-weight="700" letter-spacing="5" fill="#91c6c8">AWS CLOUD ENGINEERING · PORTFOLIO PROJECT</text>
+    <text x="72" y="177" font-size="66" font-weight="800" letter-spacing="-2">VPCraft</text>
+    <text x="77" y="218" font-size="20" fill="#b9cbd8">Build smart. Deploy securely. Operate efficiently.</text>
+  </g>
+  <path d="M78 244 H470" stroke="#75ddc1" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+</svg>

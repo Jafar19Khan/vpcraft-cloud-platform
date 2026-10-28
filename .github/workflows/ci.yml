@@ -1,0 +1,80 @@
+name: VPCraft CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  application-tests:
+    name: Application tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+
+  container-smoke-test:
+    name: Container smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Build and start the stack
+        run: |
+          cp .env.example .env
+          docker compose up --build -d
+      - name: Wait for healthy containers
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/ready > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+      - name: Check endpoints through Nginx
+        run: |
+          curl -fsS http://localhost:8080/health
+          curl -fsS http://localhost:8080/ready
+          curl -fsS http://localhost:8080/api/overview
+          curl -fsS http://localhost:8080/api/system
+          curl -fsS http://localhost:8080/api/status
+          curl -fsSI http://localhost:8080/ | grep -i content-security-policy
+      - name: Show container status
+        if: always()
+        run: docker compose ps
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v
+
+  infrastructure-validation:
+    name: Terraform validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - name: Terraform format check
+        working-directory: infra
+        run: terraform fmt -check -recursive
+      - name: Terraform initialize without backend
+        working-directory: infra
+        run: terraform init -backend=false
+      - name: Terraform validate
+        working-directory: infra
+        run: terraform validate

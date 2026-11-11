@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-slim
 LABEL org.opencontainers.image.title="vpcraft-api" org.opencontainers.image.source="https://github.com/Jafar19Khan/vpcraft-cloud-platform" org.opencontainers.image.licenses="MIT"
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /srv/vpcraft
